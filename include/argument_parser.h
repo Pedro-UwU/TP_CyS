@@ -18,7 +18,7 @@
 typedef struct {
   bool embed;
   BmpFile* carrier;
-  LsbData* in_file;
+  InputData* in_file;
   // char* out
 } Args ;
 
