@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
   // Args* args = parse_arguments(argc, argv);
-  BmpFile* bmpFile = get_bmp_file("./assets/sample.bmp");
+  BmpFile* bmpFile = get_bmp_file("./assets/red.bmp");
   describe_bmp(bmpFile);
   free_bmp_file(bmpFile);
 }

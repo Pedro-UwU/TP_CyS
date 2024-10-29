@@ -8,6 +8,7 @@
 
 void init_headers(BmpFile *bmp);
 void read_bmp(FILE *fp, BmpFile *bmp);
+void check_image_size(BmpFile* bmp);
 
 void init_bmp_files(BmpFile *bmp_file) {
   bmp_file->file = NULL;
@@ -110,9 +111,7 @@ void read_bmp(FILE *fp, BmpFile *bmp) {
     exit(1);
   }
   init_headers(bmp);
-  // read_bmp_header(bmp->header, fp);
-  // read_bmp_info_header(bmp->info_header, fp);
-  if(fread(bmp->header, sizeof(BmpHeader), 1, fp) != 1) {
+  if (fread(bmp->header, sizeof(BmpHeader), 1, fp) != 1) {
     printf("[ERROR] - read_bmp - Couldn't read bmp header\n");
     exit(1);
   }
@@ -120,7 +119,22 @@ void read_bmp(FILE *fp, BmpFile *bmp) {
     printf("[ERROR] - read_bmp - Couldn't read bmp info header\n");
     exit(1);
   }
+  uint32_t offset = bmp->header->off_bits;
+  check_image_size(bmp);
+  bmp->payload = malloc(bmp->info_header->sizeImage * sizeof(uint8_t));
+  if (bmp->payload == NULL) {
+    printf("[ERROR] - read_bmp - Couldn't allocate memory for payload\n");
+    exit(1);
+  }
+  if (fseek(fp, offset, SEEK_SET) != 0) {
+    printf("[ERROR] - read_bmp - Couldn't offset file reading\n");
+    exit(1);
+  }
 
+  if (fread(bmp->payload, bmp->info_header->sizeImage, 1, fp) != 1) {
+    printf("[ERROR] - read_bmp - Couldn't read image payload\n");
+    exit(1);
+  }
 }
 
 void init_headers(BmpFile *bmp) {
@@ -134,6 +148,15 @@ void init_headers(BmpFile *bmp) {
   bmp->header->type = 0;
   bmp->header->reserved = 0;
   bmp->header->off_bits = 0;
+}
+
+void check_image_size(BmpFile* bmp) {
+  if (bmp->info_header->sizeImage > 0) {
+    return;
+  }
+  uint32_t size = bmp->header->size - bmp->header->off_bits;
+  bmp->info_header->sizeImage = size;
+  bmp->size = size;
 }
 
 #endif
