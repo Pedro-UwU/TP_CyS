@@ -1,7 +1,7 @@
 #ifndef LSB
 #define LSB
 #include <def.h>
-#include <lsb.h>
+#include <input_file_processing.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

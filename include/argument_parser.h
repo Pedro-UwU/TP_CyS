@@ -2,7 +2,7 @@
 #define ARGUMENT_PARSER_H
 #include <def.h>
 #include <bmp_files.h>
-#include <lsb.h>
+#include <input_file_processing.h>
 
 // -embed
 // -extract
