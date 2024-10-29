@@ -8,8 +8,6 @@
 
 void init_headers(BmpFile *bmp);
 void read_bmp(FILE *fp, BmpFile *bmp);
-void read_bmp_header(BmpHeader* header, FILE* fp);
-void read_bmp_info_header(BmpInfoHeader* header, FILE* fp);
 
 void init_bmp_files(BmpFile *bmp_file) {
   bmp_file->file = NULL;
@@ -112,8 +110,16 @@ void read_bmp(FILE *fp, BmpFile *bmp) {
     exit(1);
   }
   init_headers(bmp);
-  read_bmp_header(bmp->header, fp);
-  read_bmp_info_header(bmp->info_header, fp);
+  // read_bmp_header(bmp->header, fp);
+  // read_bmp_info_header(bmp->info_header, fp);
+  if(fread(bmp->header, sizeof(BmpHeader), 1, fp) != 1) {
+    printf("[ERROR] - read_bmp - Couldn't read bmp header\n");
+    exit(1);
+  }
+  if (fread(bmp->info_header, sizeof(BmpInfoHeader), 1, fp) != 1) {
+    printf("[ERROR] - read_bmp - Couldn't read bmp info header\n");
+    exit(1);
+  }
 
 }
 
@@ -128,27 +134,6 @@ void init_headers(BmpFile *bmp) {
   bmp->header->type = 0;
   bmp->header->reserved = 0;
   bmp->header->off_bits = 0;
-}
-
-void read_bmp_header(BmpHeader* header, FILE* fp) {
-  fread(&header->type, 2, 1, fp);
-  fread(&header->size, 4, 1, fp);
-  fread(&header->reserved, 4, 1, fp);
-  fread(&header->off_bits, 4, 1, fp);
-}
-
-void read_bmp_info_header(BmpInfoHeader* header, FILE* fp) {
-  fread(&header->header_size, 4, 1, fp);
-  fread(&header->width, 4, 1, fp);
-  fread(&header->height, 4, 1, fp);
-  fread(&header->planes, 2, 1, fp);
-  fread(&header->bitCount, 2, 1, fp);
-  fread(&header->compression, 4, 1, fp);
-  fread(&header->sizeImage, 4, 1, fp);
-  fread(&header->xPelsPerMeter, 4, 1, fp);
-  fread(&header->yPelsPerMeter, 4, 1, fp);
-  fread(&header->clrUsed, 4, 1, fp);
-  fread(&header->clrImportant, 4, 1, fp);
 }
 
 #endif

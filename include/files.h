@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#pragma pack(push,1)
 typedef struct {
   uint16_t type; // Letters "BM"
   uint32_t size;
@@ -23,6 +24,7 @@ typedef struct {
   uint32_t clrUsed;
   uint32_t clrImportant;
 } BmpInfoHeader;
+#pragma pack(pop)
 
 typedef struct {
   FILE *file;

@@ -38,6 +38,6 @@ compile_commands.json: Makefile
 	@echo "]" >> $@
 
 clean:
-	rm -rf $(OBJ_DIR) $(TARGET) tests compile_commands.json
+	rm -rf $(OBJ_DIR) $(TARGET) tests 
 
 .PHONY: all clean
