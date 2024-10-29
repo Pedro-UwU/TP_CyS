@@ -8,7 +8,7 @@
 
 void init_headers(BmpFile *bmp);
 void read_bmp(FILE *fp, BmpFile *bmp);
-void check_image_size(BmpFile* bmp);
+void check_image_size(BmpFile *bmp);
 
 void init_bmp_files(BmpFile *bmp_file) {
   bmp_file->header = NULL;
@@ -147,13 +147,43 @@ void init_headers(BmpFile *bmp) {
   bmp->header->off_bits = 0;
 }
 
-void check_image_size(BmpFile* bmp) {
+void check_image_size(BmpFile *bmp) {
   if (bmp->info_header->sizeImage > 0) {
     return;
   }
   uint32_t size = bmp->header->size - bmp->header->off_bits;
   bmp->info_header->sizeImage = size;
   bmp->size = size;
+}
+
+void save_bmp(BmpFile *bmp, char *path) {
+  if (bmp == NULL) {
+    printf("[ERROR] - save_bmp - Trying to save a null file\n");
+    exit(1);
+  }
+
+  FILE *output_file = fopen(path, "w");
+  if (output_file == NULL) {
+    printf("[ERROR] - save_bmp - Couldn't create output file %s\n", path);
+    exit(1);
+  }
+
+  if (fwrite((unsigned char *)bmp->header, sizeof(BmpHeader), 1, output_file) !=
+      1) {
+    printf("[ERROR] - save_bmp - Error writing header to output file\n");
+    exit(1);
+  }
+
+  if (fwrite((unsigned char *)bmp->info_header, sizeof(BmpInfoHeader), 1, output_file) != 1) {
+    printf("[ERROR] - save_bmp - Error writing info header to output file\n");
+    exit(1);
+  }
+  fseek(output_file, bmp->header->off_bits, SEEK_SET);
+  if (fwrite(bmp->payload, 1, bmp->info_header->sizeImage, output_file) != bmp->info_header->sizeImage) {
+    printf("[ERROR] - save_bmp - Error writing colors to output file\n");
+    exit(1);
+  }
+  fclose(output_file);
 }
 
 #endif

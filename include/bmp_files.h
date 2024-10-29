@@ -38,5 +38,6 @@ typedef struct {
 BmpFile *get_bmp_file(const char *path);
 void describe_bmp(const BmpFile *bmp);
 void free_bmp_file(BmpFile *bmp_file);
+void save_bmp(BmpFile *bmp, char *path);
 
 #endif
