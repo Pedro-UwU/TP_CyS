@@ -53,3 +53,6 @@ dkms.conf
 
 ./obj
 stegobmp
+.cache
+.clang*
+compile_commands.json
