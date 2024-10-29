@@ -9,9 +9,6 @@ void init_args(Args* args) {
   args->embed = TRUE;
 }
 
-/*
- * args must be freed by the user
- */
 Args* parse_arguments(int argc, char* argv[]) {
   Args* args = malloc(sizeof(Args));
   init_args(args);
