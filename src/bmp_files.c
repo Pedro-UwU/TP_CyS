@@ -11,7 +11,6 @@ void read_bmp(FILE *fp, BmpFile *bmp);
 void check_image_size(BmpFile* bmp);
 
 void init_bmp_files(BmpFile *bmp_file) {
-  bmp_file->file = NULL;
   bmp_file->header = NULL;
   bmp_file->info_header = NULL;
   bmp_file->payload = NULL;
@@ -25,8 +24,10 @@ BmpFile *get_bmp_file(const char *path) {
   FILE *file = fopen(path, "r");
   if (file == NULL) {
     printf("[ERROR] - get_bmp_file - Couldn't open file %s\n", path);
+    exit(1);
   }
   read_bmp(file, bmp_file);
+  fclose(file);
 
   return bmp_file;
 }
@@ -34,13 +35,9 @@ BmpFile *get_bmp_file(const char *path) {
 void free_bmp_file(BmpFile *bmp_file) {
   if (bmp_file == NULL)
     return;
-  if (bmp_file->file != NULL) {
-    free(bmp_file->file);
-  }
   if (bmp_file->header != NULL) {
     free(bmp_file->header);
   }
-
   if (bmp_file->info_header != NULL) {
     free(bmp_file->info_header);
   }

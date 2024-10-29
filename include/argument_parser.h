@@ -2,6 +2,7 @@
 #define ARGUMENT_PARSER_H
 #include <def.h>
 #include <bmp_files.h>
+#include <lsb.h>
 
 // -embed
 // -extract
@@ -17,9 +18,8 @@
 typedef struct {
   bool embed;
   BmpFile* carrier;
-  // FILE inFile
-  // BMPFile carrier
-  // FILE out
+  LsbData* in_file;
+  // char* out
 } Args ;
 
 /*
