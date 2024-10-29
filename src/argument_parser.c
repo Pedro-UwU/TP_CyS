@@ -1,6 +1,8 @@
 #ifndef ARGUMENT_PARSER
 #define ARGUMENT_PARSER
+#include "bmp_files.h"
 #include <argument_parser.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <def.h>
@@ -18,6 +20,12 @@ Args* parse_arguments(int argc, char* argv[]) {
       args->embed = TRUE;
     } else if (strcmp(argv[i], "-extract") == 0) {
       args->embed = FALSE;
+    } else if (strcmp(argv[i], "-in") == 0) {
+      if (i + 1 >= argc) {
+        printf("[ERROR] - Must provide a valid in file\n");
+        exit(1);
+      }
+      args->carrier = get_bmp_file(argv[++i]);
     }
   }
 

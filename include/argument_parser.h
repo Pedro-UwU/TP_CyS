@@ -1,6 +1,7 @@
 #ifndef ARGUMENT_PARSER_H
 #define ARGUMENT_PARSER_H
 #include <def.h>
+#include <bmp_files.h>
 
 // -embed
 // -extract
@@ -15,6 +16,7 @@
 
 typedef struct {
   bool embed;
+  BmpFile* carrier;
   // FILE inFile
   // BMPFile carrier
   // FILE out

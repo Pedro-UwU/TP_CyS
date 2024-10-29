@@ -1,6 +1,6 @@
 #ifndef FILES
 #define FILES
-#include <files.h>
+#include <bmp_files.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
