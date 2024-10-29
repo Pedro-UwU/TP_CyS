@@ -9,11 +9,10 @@
 int main(int argc, char *argv[]) {
   Args* args = parse_arguments(argc, argv);
   BmpFile* bmpFile = args->carrier;
-  save_bmp(bmpFile, "./output.bmp");
 
-  // handle_embedding(args, LSB1);
-  // free_bmp_file(bmpFile);
-  // free_lsb_data(args->in_file);
+  handle_embedding(args, LSB1);
+  free_bmp_file(bmpFile);
+  free_lsb_data(args->in_file);
 }
 
 #endif

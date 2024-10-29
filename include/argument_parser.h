@@ -19,8 +19,8 @@ typedef struct {
   bool embed;
   BmpFile* carrier;
   InputData* in_file;
-  // char* out
-} Args ;
+  char* out;
+} Args;
 
 /*
  * args must be freed by the user
