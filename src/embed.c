@@ -43,7 +43,7 @@ void handle_lsb1(Args *args) {
     exit(1);
   }
 
-  inject_message(bmp->payload, payload, dim, 1);
+  inject_message(bmp->payload, payload, dim, 2);
   save_bmp(bmp, args->out);
 }
 
@@ -69,6 +69,12 @@ void inject_message(unsigned char *dest, const unsigned char *msg,
   size_t char_index = 0;
   size_t bit_index = 0;
   size_t dest_index = 0;
+
+  printf("1- char %02X\n", msg[0]);
+  printf("2- char %02X\n", msg[1]);
+  printf("3- char %02X\n", msg[2]);
+  printf("4- char %02X\n", msg[3]);
+  printf("Message len = %lu\n", msg_dim);
 
   for (size_t index = 0; index < msg_dim * 8; index += step) {
     char_index = index / 8;
