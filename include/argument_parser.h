@@ -20,6 +20,7 @@ typedef struct {
   BmpFile* carrier;
   InputData* in_file;
   char* out;
+  LsbType lsb_type;
 } Args;
 
 /*
