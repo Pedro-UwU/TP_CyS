@@ -1,7 +1,8 @@
 #ifndef ARGUMENT_PARSER
 #define ARGUMENT_PARSER
-#include "bmp_files.h"
+#include <bmp_files.h>
 #include <argument_parser.h>
+#include <input_file_processing.h>
 #include <def.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,9 +51,8 @@ Args *parse_arguments(int argc, char *argv[]) {
         exit(1);
       }
       char *args_output_file = argv[++i];
-      char *output_file = malloc(strlen(args_output_file) + 1);
+      char *output_file = malloc(strlen(args_output_file) * sizeof(char)  + 1);
       strcpy(output_file, args_output_file);
-      printf("OUTPUT: %s\n", output_file);
       args->out = output_file;
       output = TRUE;
     } else if (strcmp(argv[i], "-steg") == 0) {
@@ -98,6 +98,23 @@ Args *parse_arguments(int argc, char *argv[]) {
   }
 
   return args;
+}
+
+void free_args(Args* args) {
+  if (args == NULL) {
+    return;
+  }
+
+  if (args->carrier != NULL) {
+    free_bmp_file(args->carrier);
+  }
+  if (args->in_file != NULL) {
+    free_lsb_data(args->in_file);
+  }
+  if (args->out != NULL) {
+    free(args->out);
+  }
+  free(args);
 }
 
 #endif

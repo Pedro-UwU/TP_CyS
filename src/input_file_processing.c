@@ -115,7 +115,7 @@ unsigned char *generate_unencrypted_payload(InputData *data, size_t* dim) {
   size_t extension_len = strlen(data->extension) + 1;
   size_t size = 4 + data->payload_size + extension_len * sizeof(char);
   unsigned char *result = malloc(size + 1);
-  uint32_t result_size = size - 4;
+  uint32_t result_size = data->payload_size;
   // Save in big endian
   result[0] = (result_size >> 24) & 0xFF;
   result[1] = (result_size >> 16) & 0xFF;

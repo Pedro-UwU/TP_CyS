@@ -2,6 +2,9 @@
 #define DEF_H
 #define TRUE 1
 #define FALSE 0
+#define BITS_FOR_SIZE 32
+#define BYTES_FOR_SIZE (BITS_FOR_SIZE/8)
+
 #include <stdint.h>
 
 

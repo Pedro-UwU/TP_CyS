@@ -5,14 +5,20 @@
 #include <bmp_files.h>
 #include <input_file_processing.h>
 #include <embed.h>
+#include <extract.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
   Args* args = parse_arguments(argc, argv);
-  BmpFile* bmpFile = args->carrier;
 
-  handle_embedding(args, LSB1);
-  free_bmp_file(bmpFile);
-  free_lsb_data(args->in_file);
+  if (args->embed) {
+    printf("EMBEDDING\n");
+    handle_embedding(args);
+  } else {
+    printf("EXTRACTING\n");
+    handle_extraction(args);
+  }
+  free_args(args);
 }
 
 #endif

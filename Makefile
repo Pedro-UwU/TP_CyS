@@ -1,8 +1,8 @@
 TARGET = stegobmp
 # flags
 CC = gcc
-CFLAGS = -Wall -Wextra -O2 -g
-LDFLAGS = -lssl -lcrypto  # Librerías de OpenSSL para cifrado
+CFLAGS = -Wall -Wextra -g -fsanitize=address
+LDFLAGS = -lssl -lcrypto -fsanitize=address # Librerías de OpenSSL para cifrado
 
 # Carpetas
 SRC_DIR = src

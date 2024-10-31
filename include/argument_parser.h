@@ -27,5 +27,6 @@ typedef struct {
  * args must be freed by the user
  */
 Args* parse_arguments(int argc, char* argv[]);
+void free_args(Args* args);
 
 #endif

@@ -118,7 +118,7 @@ void read_bmp(FILE *fp, BmpFile *bmp) {
   }
   uint32_t offset = bmp->header->off_bits;
   check_image_size(bmp);
-  bmp->payload = malloc(bmp->info_header->sizeImage * sizeof(uint8_t));
+  bmp->payload = malloc(bmp->info_header->sizeImage * sizeof(char));
   if (bmp->payload == NULL) {
     printf("[ERROR] - read_bmp - Couldn't allocate memory for payload\n");
     exit(1);
@@ -173,6 +173,7 @@ void save_bmp(BmpFile *bmp, char *path) {
     printf("[ERROR] - save_bmp - Error writing header to output file\n");
     exit(1);
   }
+
 
   if (fwrite((unsigned char *)bmp->info_header, sizeof(BmpInfoHeader), 1, output_file) != 1) {
     printf("[ERROR] - save_bmp - Error writing info header to output file\n");
