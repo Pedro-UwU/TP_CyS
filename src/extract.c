@@ -118,7 +118,6 @@ void save_extracted_file(Args* args, char* payload, uint32_t payload_length, cha
       printf("[ERROR] - save_extracted_file - Trying to save file with NULL arguments\n");
       exit(1);
   }
-  printf("Length: %u\n", payload_length);
   char* path = args->out;
   char* full_path = malloc((strlen(path) + strlen(extension) + 1) * sizeof(char));
   strcpy(full_path, path);
@@ -128,12 +127,11 @@ void save_extracted_file(Args* args, char* payload, uint32_t payload_length, cha
       printf("[ERROR] - save_extracted_file - Couldn't create file %s\n", full_path);
       exit(1);
   }
-  printf("Output file %p\n", output_file);
   if (fwrite(payload, sizeof(char), payload_length, output_file) != payload_length) {
       printf("[ERROR] - save_extracted_file - Couldn't write to output file\n");
       exit(1);
   }
-  printf("File created\n");
+  printf("Created file: %s\n", full_path);
   fclose(output_file);
   free(full_path);
 }
