@@ -55,4 +55,5 @@ dkms.conf
 stegobmp
 .cache
 .clang*
+!.clang-format
 compile_commands.json

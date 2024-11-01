@@ -3,7 +3,6 @@
 #include <def.h>
 #include <argument_parser.h>
 
-void handle_embedding(Args* args);
+void handle_embedding(Args *args);
 
 #endif
-

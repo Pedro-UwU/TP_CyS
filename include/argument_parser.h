@@ -13,20 +13,20 @@
 // * -a <aes128, aes192, aes256, 3des>
 // * -m <ecb | cfb | ofb | cbc>
 // * -pass password
-// 
+//
 
 typedef struct {
-  bool embed;
-  BmpFile* carrier;
-  InputData* in_file;
-  char* out;
-  LsbType lsb_type;
+        bool embed;
+        BmpFile *carrier;
+        InputData *in_file;
+        char *out;
+        LsbType lsb_type;
 } Args;
 
 /*
  * args must be freed by the user
  */
-Args* parse_arguments(int argc, char* argv[]);
-void free_args(Args* args);
+Args *parse_arguments(int argc, char *argv[]);
+void free_args(Args *args);
 
 #endif
