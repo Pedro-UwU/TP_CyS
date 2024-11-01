@@ -1,7 +1,6 @@
 #ifndef MAIN
 #define MAIN
 #include <def.h>
-#include <argument_parser.h>
 #include <bmp_files.h>
 #include <input_file_processing.h>
 #include <embed.h>

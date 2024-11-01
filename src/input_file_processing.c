@@ -1,5 +1,6 @@
 #ifndef LSB
 #define LSB
+#include "argument_parser.h"
 #include <def.h>
 #include <input_file_processing.h>
 #include <stdint.h>
@@ -123,9 +124,11 @@ unsigned char *generate_unencrypted_payload(InputData *data, size_t* dim) {
   result[3] = result_size & 0xFF;
   memcpy(result + 4, data->payload, data->payload_size);
   memcpy(result + 4 + data->payload_size, data->extension, extension_len);
+  printf("Extension writen: %s at %u\n", &result[4 + data->payload_size], data->payload_size);
   result[size] = '\0';
   *dim = size;
   return result;
 }
+
 
 #endif

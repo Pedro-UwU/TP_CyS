@@ -12,5 +12,5 @@ InputData* extract_lsb_data_from_file(char* path);
 void free_lsb_data(InputData* data);
 void describe_lsb_data(const InputData* data);
 unsigned char *generate_unencrypted_payload(InputData *data, size_t* dim);
-
 #endif
+
