@@ -10,7 +10,7 @@
 
 void init_args(Args *args)
 {
-        args->embed = TRUE;
+        args->action = ACTION_EMBED;
         args->carrier = NULL;
         args->in_file = NULL;
         args->out = NULL;
@@ -28,10 +28,10 @@ Args *parse_arguments(int argc, char *argv[])
 
         for (int i = 1; i < argc; i++) {
                 if (strcmp(argv[i], "-embed") == 0) {
-                        args->embed = TRUE;
+                        args->action = ACTION_EMBED;
                         instruction = TRUE;
                 } else if (strcmp(argv[i], "-extract") == 0) {
-                        args->embed = FALSE;
+                        args->action = ACTION_EXTRACT;
                         instruction = TRUE;
                 } else if (strcmp(argv[i], "-p") == 0) {
                         if (i + 1 >= argc) {
@@ -80,7 +80,7 @@ Args *parse_arguments(int argc, char *argv[])
                 printf("[ERROR] - Either '-embed' or '-extract' flags must be present\n");
                 exit(1);
         }
-        if (!input && args->embed) {
+        if (!input && args->action == ACTION_EMBED) {
                 printf("[ERROR] - If embeding, an input file must be provided with '-in "
                        "<file>'\n");
                 exit(1);

@@ -16,7 +16,7 @@
 //
 
 typedef struct {
-        bool embed;
+        Action action;
         BmpFile *carrier;
         InputData *in_file;
         char *out;

@@ -11,5 +11,6 @@
 typedef uint8_t bool;
 
 typedef enum { LSB1, LSB4, LSBI } LsbType;
+typedef enum { ACTION_EMBED, ACTION_EXTRACT } Action;
 
 #endif

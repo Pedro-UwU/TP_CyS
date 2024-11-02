@@ -11,12 +11,14 @@ int main(int argc, char *argv[])
 {
         Args *args = parse_arguments(argc, argv);
 
-        if (args->embed) {
+        if (args->action == ACTION_EMBED) {
                 printf("EMBEDDING\n");
                 handle_embedding(args);
-        } else {
+        } else if (args->action == ACTION_EXTRACT) {
                 printf("EXTRACTING\n");
                 handle_extraction(args);
+        } else {
+                printf("Invalid action detected. Shame to the programmer\n");
         }
         free_args(args);
 }
