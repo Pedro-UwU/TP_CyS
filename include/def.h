@@ -13,4 +13,20 @@ typedef uint8_t bool;
 typedef enum { LSB1, LSB4, LSBI } LsbType;
 typedef enum { ACTION_EMBED, ACTION_EXTRACT } Action;
 
-#endif
+typedef enum {
+        EncryptAlgo_NONE,
+        EncryptAlgo_AES128,
+        EncryptAlgo_AES192,
+        EncryptAlgo_AES256,
+        EncryptAlgo_3DES
+} EncryptionAlgorithm;
+
+typedef enum {
+        EncryptMode_NONE,
+        EncryptMode_ECB,
+        EncryptMode_CFB,
+        EncryptMode_OFB,
+        EncryptMode_CBC
+} EncryptionMode;
+
+#endif /* DEF_H */

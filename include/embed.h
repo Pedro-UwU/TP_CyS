@@ -5,4 +5,4 @@
 
 void handle_embedding(Args *args);
 
-#endif
+#endif /* EMBED_H */

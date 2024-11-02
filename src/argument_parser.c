@@ -14,6 +14,65 @@ void init_args(Args *args)
         args->carrier = NULL;
         args->in_file = NULL;
         args->out = NULL;
+        args->encryption.algorithm = EncryptAlgo_NONE;
+        args->encryption.mode = EncryptMode_NONE;
+        args->encryption.password = NULL;
+}
+
+void set_encryption_algorithm(const char *algorithm, Args *args)
+{
+        if (strcmp(algorithm, "aes128") == 0) {
+                args->encryption.algorithm = EncryptAlgo_AES128;
+        } else if (strcmp(algorithm, "aes192") == 0) {
+                args->encryption.algorithm = EncryptAlgo_AES192;
+        } else if (strcmp(algorithm, "aes256") == 0) {
+                args->encryption.algorithm = EncryptAlgo_AES256;
+        } else if (strcmp(algorithm, "3des") == 0) {
+                args->encryption.algorithm = EncryptAlgo_3DES;
+        } else {
+                printf("[ERROR] - Encryption Algorithm be one of 'aes128', 'aes192', 'aes256', '3des'\n");
+                exit(1);
+        }
+
+        // Defaults
+        if (args->encryption.mode == EncryptMode_NONE) {
+                args->encryption.mode = EncryptMode_CBC;
+        }
+}
+
+void set_encryption_mode(const char *mode, Args *args)
+{
+        if (strcmp(mode, "ecb") == 0) {
+                args->encryption.mode = EncryptMode_ECB;
+        } else if (strcmp(mode, "cfb") == 0) {
+                args->encryption.mode = EncryptMode_CFB;
+        } else if (strcmp(mode, "ofb") == 0) {
+                args->encryption.mode = EncryptMode_OFB;
+        } else if (strcmp(mode, "cbc") == 0) {
+                args->encryption.mode = EncryptMode_CBC;
+        } else {
+                printf("[ERROR] - Encryption Mode be one of 'ecb', 'cfb', 'ofb', 'cbc'\n");
+                exit(1);
+        }
+
+        // Defaults
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                args->encryption.algorithm = EncryptAlgo_AES128;
+        }
+}
+
+void set_encryption_password(const char *password, Args *args)
+{
+        args->encryption.password = password;
+
+        // Defaults
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                args->encryption.algorithm = EncryptAlgo_AES128;
+        }
+
+        if (args->encryption.mode == EncryptMode_NONE) {
+                args->encryption.mode = EncryptMode_CBC;
+        }
 }
 
 Args *parse_arguments(int argc, char *argv[])
@@ -74,6 +133,15 @@ Args *parse_arguments(int argc, char *argv[])
                                 exit(1);
                         }
                         steg = TRUE;
+                } else if (strcmp(argv[i], "-a") == 0) {
+                        /* Encryption Algorithm */
+                        set_encryption_algorithm(argv[++i], args);
+                } else if (strcmp(argv[i], "-m") == 0) {
+                        /* Encryption Mode */
+                        set_encryption_mode(argv[++i], args);
+                } else if (strcmp(argv[i], "-pass") == 0) {
+                        /* Encryption Password */
+                        set_encryption_password(argv[++i], args);
                 }
         }
         if (instruction == FALSE) {
@@ -96,6 +164,21 @@ Args *parse_arguments(int argc, char *argv[])
         if (!steg) {
                 printf("[ERROR] - A steganography method must be selected with '-steg "
                        "<LSB1 | LSB4 | LSBI>\n");
+                exit(1);
+        }
+
+        /* 
+         * Son válidas en cambio las siguientes opciones:
+         *         - Indicar algoritmo y password pero no modo: Se asume CBC por default.
+         *         - Indicar modo y password pero no algoritmo: Se asume aes128 por default.
+         *         - Indicar sólo password: Se asume algoritmo aes128 en modo CBC por default.
+         */
+        if (args->encryption.mode != EncryptMode_NONE && args->encryption.password == NULL) {
+                printf("[ERROR] - A password must be provided alongside the encryption mode.\n");
+                exit(1);
+        }
+        if (args->encryption.algorithm != EncryptAlgo_NONE && args->encryption.password == NULL) {
+                printf("[ERROR] - A password must be provided alongside the encryption algorithm.\n");
                 exit(1);
         }
 

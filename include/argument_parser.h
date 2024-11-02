@@ -16,11 +16,18 @@
 //
 
 typedef struct {
+        EncryptionAlgorithm algorithm;
+        EncryptionMode mode;
+        const char *password;
+} Encryption;
+
+typedef struct {
         Action action;
         BmpFile *carrier;
         InputData *in_file;
         char *out;
         LsbType lsb_type;
+        Encryption encryption;
 } Args;
 
 /*
@@ -29,4 +36,4 @@ typedef struct {
 Args *parse_arguments(int argc, char *argv[]);
 void free_args(Args *args);
 
-#endif
+#endif /* ARGUMENT_PARSER_H */
