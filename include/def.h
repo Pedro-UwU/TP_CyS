@@ -4,6 +4,7 @@
 #define FALSE 0
 #define BITS_FOR_SIZE 32
 #define BYTES_FOR_SIZE (BITS_FOR_SIZE / 8)
+#define MAX_EXTENSION_LENGTH 64
 
 #include <stdint.h>
 

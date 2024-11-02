@@ -1,5 +1,6 @@
 #ifndef LSB
 #define LSB
+#include "argument_parser.h"
 #include <def.h>
 #include <input_file_processing.h>
 #include <stdint.h>
