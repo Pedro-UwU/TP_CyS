@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: MIT
 # 
-# Copyright (c) 2022 Martín E. Zahnd
+# Copyright (c) 2024 Martín E. Zahnd
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to 
