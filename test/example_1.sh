@@ -27,6 +27,9 @@ pushd "$SCRIPT_DIR" &> /dev/null
 BIN_EXEC="../stegobmp"
 RM_COMMAND="trash-put"
 
+# Generate random file with N size
+# < /dev/urandom tr -dc '[:alnum:]' |  head -c 150000000 > mensaje1_big.txt
+
 print_success() {
   echo -en "\e[1m\e[32m[OK]\e[0m "
   echo "$1"
@@ -83,6 +86,11 @@ run_test() {
 
 # Esteganografiar archivo con LSB1, sin encripción
 run_test "lsb1_no_encript_imagenmas1.bmp" "lsb1_no_encript_mensaje1" "-steg LSB1"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSB1, con AES-128 y CBC; y
+# password 'oculto123abc'
+run_test "lsb1_aes-128-cbc_encript_imagenmas1.bmp" "lsb1_aes-128-cbc_encript_mensaje1" "-steg LSB1 -a aes128 -m cbc -pass 'oculto123abc'"
 
  # Esteganografiar el archivo de texto “mensaje1.txt” en el archivo portador “imagen1.bmp” 
  # obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSB Improved, con encripción 3DES en 

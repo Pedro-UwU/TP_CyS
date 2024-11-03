@@ -121,7 +121,7 @@ void extract_payload(InputData *data, FILE *fp)
 unsigned char *generate_unencrypted_payload(InputData *data, size_t *dim)
 {
         size_t extension_len = strlen(data->extension) + 1;
-        size_t size = 4 + data->payload_size + extension_len * sizeof(char);
+        size_t size = DWORD + data->payload_size + extension_len * sizeof(char);
         unsigned char *result = malloc(size + 1);
         uint32_t result_size = data->payload_size;
         // Save in big endian
@@ -129,8 +129,8 @@ unsigned char *generate_unencrypted_payload(InputData *data, size_t *dim)
         result[1] = (result_size >> 16) & 0xFF;
         result[2] = (result_size >> 8) & 0xFF;
         result[3] = result_size & 0xFF;
-        memcpy(result + 4, data->payload, data->payload_size);
-        memcpy(result + 4 + data->payload_size, data->extension, extension_len);
+        memcpy(result + DWORD, data->payload, data->payload_size);
+        memcpy(result + DWORD + data->payload_size, data->extension, extension_len);
         result[size] = '\0';
         *dim = size;
         return result;

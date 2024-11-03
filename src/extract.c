@@ -1,5 +1,6 @@
 #ifndef EXTRACT
 #define EXTRACT
+#include "encrypt.h"
 #include <argument_parser.h>
 #include <bmp_files.h>
 #include <def.h>
@@ -10,11 +11,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint32_t get_message_lenght(uint8_t *payload, uint8_t bits);
+static void extract_encrypted_msg(Args *args, uint8_t step);
+uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t bits);
 void handle_extraction_lsb(Args *args, uint8_t step);
 char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step);
 char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t step);
 void save_extracted_file(Args *args, char *payload, uint32_t payload_length, char *extension);
+
+uint32_t get_message_lenght(uint8_t *message);
+char *extract_message_extension(unsigned char *message, uint32_t message_size);
 
 void handle_extraction(Args *args)
 {
@@ -23,16 +28,51 @@ void handle_extraction(Args *args)
                 exit(1);
         }
 
-        switch (args->lsb_type) {
-        case LSB1:
-                handle_extraction_lsb(args, 1);
-                break;
-        case LSB4:
-                handle_extraction_lsb(args, 4);
-                break;
-        case LSBI:
-                break;
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                switch (args->lsb_type) {
+                case LSB1:
+                        handle_extraction_lsb(args, 1);
+                        break;
+                case LSB4:
+                        handle_extraction_lsb(args, 4);
+                        break;
+                case LSBI:
+                        break;
+                }
+        } else {
+                switch (args->lsb_type) {
+                case LSB1:
+                        extract_encrypted_msg(args, 1);
+                        break;
+                case LSB4:
+                        extract_encrypted_msg(args, 4);
+                        break;
+                case LSBI:
+                        break;
+                }
         }
+}
+
+static void extract_encrypted_msg(Args *args, uint8_t step)
+{
+        BmpFile *carrier = args->carrier;
+        uint8_t *payload = carrier->payload;
+
+        uint32_t e_message_size = get_payload_message_lenght(payload, step);
+        char *e_message = extract_message(payload, e_message_size, step);
+
+        size_t d_size = 0;
+        unsigned char *decrypted = decrypt_payload(&args->encryption, (unsigned char *)e_message,
+                                                   e_message_size, &d_size);
+
+        uint32_t message_size = get_message_lenght(decrypted);
+        unsigned char *message = decrypted + DWORD;
+        char *extension = extract_message_extension(message, message_size);
+
+        save_extracted_file(args, (char *)message, message_size, extension);
+
+        free(decrypted);
+        free(e_message);
 }
 
 void handle_extraction_lsb(Args *args, uint8_t step)
@@ -40,7 +80,7 @@ void handle_extraction_lsb(Args *args, uint8_t step)
         BmpFile *carrier = args->carrier;
         uint8_t *payload = carrier->payload;
         // size_t payload_length = carrier->info_header->sizeImage;
-        uint32_t message_size = get_message_lenght(payload, step);
+        uint32_t message_size = get_payload_message_lenght(payload, step);
         char *message = extract_message(payload, message_size, step);
         char *extension = extract_payload_extension(payload, message_size, step);
         save_extracted_file(args, (char *)message, message_size, extension);
@@ -48,7 +88,7 @@ void handle_extraction_lsb(Args *args, uint8_t step)
         free(extension);
 }
 
-uint32_t get_message_lenght(uint8_t *payload, uint8_t step)
+uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step)
 {
         uint8_t total_steps = BITS_FOR_SIZE / step;
         uint32_t size = 0;
@@ -59,7 +99,16 @@ uint32_t get_message_lenght(uint8_t *payload, uint8_t step)
                 size |= bits;
         }
         return size;
-        return 0;
+}
+
+uint32_t get_message_lenght(uint8_t *message)
+{
+        uint32_t size = 0;
+        size |= ((uint32_t)message[0] << 24);
+        size |= ((uint32_t)message[1] << 16);
+        size |= ((uint32_t)message[2] << 8);
+        size |= ((uint32_t)message[3]);
+        return size;
 }
 
 char extract_char(uint8_t *payload, uint32_t index, uint8_t step)
@@ -113,6 +162,11 @@ char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t
         memcpy(to_return, extension, i);
         free(extension);
         return to_return;
+}
+
+char *extract_message_extension(unsigned char *message, uint32_t message_size)
+{
+        return (char *)(message + message_size);
 }
 
 void save_extracted_file(Args *args, char *payload, uint32_t payload_length, char *extension)

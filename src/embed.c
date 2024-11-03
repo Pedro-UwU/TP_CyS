@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <encrypt.h>
 
 unsigned char get_isolated_bits(unsigned char value, size_t index, size_t length);
 void inject_message(unsigned char *dest, const unsigned char *msg, size_t msg_dim, size_t step);
@@ -42,9 +43,21 @@ void handle_lsb1(Args *args)
         unsigned char *payload;
         // TODO: Add encrypted
         size_t dim = 0;
-        payload = generate_unencrypted_payload(input_data, &dim);
+
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                payload = generate_unencrypted_payload(input_data, &dim);
+        } else {
+                size_t p_dim = 0;
+                unsigned char *p_payload;
+
+                p_payload = generate_unencrypted_payload(input_data, &p_dim);
+                payload = encrypt_payload(&args->encryption, p_payload, p_dim, &dim);
+                free(p_payload);
+        }
+
         if (dim * sizeof(char) > bmp->info_header->sizeImage) {
-                printf("[ERROR] - handle_embedding - Input file is too large\n");
+                printf("[ERROR] - handle_embedding - Input file is too large, must be at most %d\n",
+                       bmp->info_header->sizeImage);
                 exit(1);
         }
 
@@ -62,7 +75,8 @@ void handle_lsb4(Args *args)
         size_t dim = 0;
         payload = generate_unencrypted_payload(input_data, &dim);
         if (dim * sizeof(char) / 4 > bmp->info_header->sizeImage) {
-                printf("[ERROR] - handle_embedding - Input file is too large\n");
+                printf("[ERROR] - handle_embedding - Input file is too large, must be at most %d\n",
+                       bmp->info_header->sizeImage);
                 exit(1);
         }
 

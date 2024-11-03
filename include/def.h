@@ -5,6 +5,7 @@
 #define BITS_FOR_SIZE 32
 #define BYTES_FOR_SIZE (BITS_FOR_SIZE / 8)
 #define MAX_EXTENSION_LENGTH 64
+#define DWORD 4 // Size in bytes
 
 #include <stdint.h>
 
