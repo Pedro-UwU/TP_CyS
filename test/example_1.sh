@@ -86,6 +86,8 @@ run_test() {
 
 # =============== LSB1 ===============
 
+echo -e "\e[1m\e[34m=====> LSB1\e[0m "
+
 # Esteganografiar archivo con LSB1, sin encripción
 run_test "lsb1_no_encript_imagenmas1.bmp" "lsb1_no_encript_mensaje1" "-steg LSB1"
 
@@ -180,6 +182,8 @@ run_test "lsb1_3des-cbc_encript_imagenmas1.bmp" "lsb1_3des-cbc_encript_mensaje1"
 
 # =============== LSB4 ===============
 
+echo -e "\e[1m\e[34m=====> LSB4\e[0m "
+
 # Esteganografiar archivo con LSB4, sin encripción
 run_test "lsb4_no_encript_imagenmas1.bmp" "lsb4_no_encript_mensaje1" "-steg LSB4"
 
@@ -273,14 +277,97 @@ run_test "lsb4_3des-cbc_encript_imagenmas1.bmp" "lsb4_3des-cbc_encript_mensaje1"
 
 # =============== LSBI ===============
 
-# # Esteganografiar el archivo de texto “mensaje1.txt” en el archivo portador “imagen1.bmp” 
-# # obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSB Improved, con encripción 3DES en 
-# # modo CBC con password “oculto” 
-# run_test "lsbi_3des_cbc_pass_imagenmas1.bmp" "lsbi_3des_cbc_pass_mensaje1" "-steg LSBI -a 3des -m cbc -pass 'oculto'"
-# 
-# # Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
-# # obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSB Improved, sin encripción
-# run_test "lsbi_no_encript_imagenmas1.bmp" "lsbi_no_encript_mensaje1" "-steg LSBI"
+echo -e "\e[1m\e[34m=====> LSBI\e[0m "
 
+# Esteganografiar archivo con LSBI, sin encripción
+run_test "lsbi_no_encript_imagenmas1.bmp" "lsbi_no_encript_mensaje1" "-steg LSBI"
+
+# ***** AES-128 *****
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-128 y ecb; y
+# password 'oculto123abc'
+run_test "lsbi_aes-128-ecb_encript_imagenmas1.bmp" "lsbi_aes-128-ecb_encript_mensaje1" "-steg LSBI -a aes128 -m ecb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-128 y CFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-128-cfb_encript_imagenmas1.bmp" "lsbi_aes-128-cfb_encript_mensaje1" "-steg LSBI -a aes128 -m cfb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-128 y OFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-128-ofb_encript_imagenmas1.bmp" "lsbi_aes-128-ofb_encript_mensaje1" "-steg LSBI -a aes128 -m ofb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-128 y CBC; y
+# password 'oculto123abc'
+run_test "lsbi_aes-128-cbc_encript_imagenmas1.bmp" "lsbi_aes-128-cbc_encript_mensaje1" "-steg LSBI -a aes128 -m cbc -pass 'oculto123abc'"
+
+# ***** AES-192 *****
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-192 y ecb; y
+# password 'oculto123abc'
+run_test "lsbi_aes-192-ecb_encript_imagenmas1.bmp" "lsbi_aes-192-ecb_encript_mensaje1" "-steg LSBI -a aes192 -m ecb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-192 y CFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-192-cfb_encript_imagenmas1.bmp" "lsbi_aes-192-cfb_encript_mensaje1" "-steg LSBI -a aes192 -m cfb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-192 y OFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-192-ofb_encript_imagenmas1.bmp" "lsbi_aes-192-ofb_encript_mensaje1" "-steg LSBI -a aes192 -m ofb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-192 y CBC; y
+# password 'oculto123abc'
+run_test "lsbi_aes-192-cbc_encript_imagenmas1.bmp" "lsbi_aes-192-cbc_encript_mensaje1" "-steg LSBI -a aes192 -m cbc -pass 'oculto123abc'"
+
+# ***** AES-256 *****
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-256 y ecb; y
+# password 'oculto123abc'
+run_test "lsbi_aes-256-ecb_encript_imagenmas1.bmp" "lsbi_aes-256-ecb_encript_mensaje1" "-steg LSBI -a aes256 -m ecb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-256 y CFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-256-cfb_encript_imagenmas1.bmp" "lsbi_aes-256-cfb_encript_mensaje1" "-steg LSBI -a aes256 -m cfb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-256 y OFB; y
+# password 'oculto123abc'
+run_test "lsbi_aes-256-ofb_encript_imagenmas1.bmp" "lsbi_aes-256-ofb_encript_mensaje1" "-steg LSBI -a aes256 -m ofb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con AES-256 y CBC; y
+# password 'oculto123abc'
+run_test "lsbi_aes-256-cbc_encript_imagenmas1.bmp" "lsbi_aes-256-cbc_encript_mensaje1" "-steg LSBI -a aes256 -m cbc -pass 'oculto123abc'"
+
+# ***** 3DES *****
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con 3DES y ecb; y
+# password 'oculto123abc'
+run_test "lsbi_3des-ecb_encript_imagenmas1.bmp" "lsbi_3des-ecb_encript_mensaje1" "-steg LSBI -a 3des -m ecb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con 3DES y CFB; y
+# password 'oculto123abc'
+run_test "lsbi_3des-cfb_encript_imagenmas1.bmp" "lsbi_3des-cfb_encript_mensaje1" "-steg LSBI -a 3des -m cfb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con 3DES y OFB; y
+# password 'oculto123abc'
+run_test "lsbi_3des-ofb_encript_imagenmas1.bmp" "lsbi_3des-ofb_encript_mensaje1" "-steg LSBI -a 3des -m ofb -pass 'oculto123abc'"
+
+# Esteganografiar el archivo de imagen “mensaje1.txt” en el archivo portador “imagen1 .bmp” 
+# obteniendo un archivo “imagenmas1.bmp” mediante el algoritmo LSBI, con 3DES y CBC; y
+# password 'oculto123abc'
+run_test "lsbi_3des-cbc_encript_imagenmas1.bmp" "lsbi_3des-cbc_encript_mensaje1" "-steg LSBI -a 3des -m cbc -pass 'oculto123abc'"
 
 popd &> /dev/null # $SCRIPT_DIR
