@@ -41,7 +41,6 @@ void handle_lsb1(Args *args)
         InputData *input_data = args->in_file;
         BmpFile *bmp = args->carrier;
         unsigned char *payload;
-        // TODO: Add encrypted
         size_t dim = 0;
 
         if (args->encryption.algorithm == EncryptAlgo_NONE) {
@@ -71,9 +70,19 @@ void handle_lsb4(Args *args)
         InputData *input_data = args->in_file;
         BmpFile *bmp = args->carrier;
         unsigned char *payload;
-        // TODO: Add encrypted
         size_t dim = 0;
-        payload = generate_unencrypted_payload(input_data, &dim);
+
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                payload = generate_unencrypted_payload(input_data, &dim);
+        } else {
+                size_t p_dim = 0;
+                unsigned char *p_payload;
+
+                p_payload = generate_unencrypted_payload(input_data, &p_dim);
+                payload = encrypt_payload(&args->encryption, p_payload, p_dim, &dim);
+                free(p_payload);
+        }
+
         if (dim * sizeof(char) / 4 > bmp->info_header->sizeImage) {
                 printf("[ERROR] - handle_embedding - Input file is too large, must be at most %d\n",
                        bmp->info_header->sizeImage);
