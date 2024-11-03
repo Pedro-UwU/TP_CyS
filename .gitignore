@@ -57,3 +57,6 @@ stegobmp
 .clang*
 !.clang-format
 compile_commands.json
+
+test/*.bmp
+test/*.txt
