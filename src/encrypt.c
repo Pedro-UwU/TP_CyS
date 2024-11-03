@@ -61,7 +61,6 @@ static const char *mode_name(EncryptionMode mode)
 
 static const EVP_CIPHER *get_cipher(EncryptionAlgorithm algorithm, EncryptionMode mode)
 {
-        /* const EVP_CIPHER *EVP_get_cipherbyname(const char *name); */
         const char *a = algorithm_name(algorithm);
         const char *m = mode_name(mode);
 
@@ -110,17 +109,6 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
                 goto end;
         }
 
-        /* int EVP_BytesToKey(const EVP_CIPHER *type, const EVP_MD *md,
-         *                    const unsigned char *salt,
-         *                    const unsigned char *data, int datal, int count,
-         *                    unsigned char *key, unsigned char *iv);
-         */
-
-        /* int PKCS5_PBKDF2_HMAC(const char *pass, int passlen,
-         *                       const unsigned char *salt, int saltlen, int iter,
-         *                       const EVP_MD *digest,
-         *                       int keylen, unsigned char *out);
-         */
         if (0 == PKCS5_PBKDF2_HMAC(encryption->password, -1, (unsigned char *)__SALT, 0, 10000,
                                    EVP_sha256(), key_len + iv_len, key_iv)) {
                 printf("[ERROR] - encrypt_decrypt_msg - PKCS5_PBKDF2_HMAC error\n");
@@ -142,25 +130,17 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
         memcpy(key, key_iv, key_len);
         memcpy(iv, key_iv + key_len, iv_len);
 
-        /* int EVP_CipherInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
-         *                       ENGINE *impl, const unsigned char *key, const unsigned char *iv, int enc);
-         */
         // Perform encryption / decryption
         if (0 == EVP_CipherInit_ex(ctx, cipher, NULL, key, iv, action)) {
                 printf("[ERROR] - encrypt_decrypt_msg - CipherInit_ex error\n");
                 goto end;
         }
 
-        /* int EVP_CipherUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
-         *                     int *outl, const unsigned char *in, int inl);
-         */
         if (0 == EVP_CipherUpdate(ctx, out, &outlen, msg, msg_len)) {
                 printf("[ERROR] - encrypt_decrypt_msg - CipherUpdate error\n");
                 goto end;
         }
 
-        /* int EVP_CipherFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
-         */
         if (0 == EVP_CipherFinal_ex(ctx, out + outlen, &len)) {
                 printf("[ERROR] - encrypt_decrypt_msg - CipherFinal_ex error\n");
                 goto end;

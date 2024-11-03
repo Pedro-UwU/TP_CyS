@@ -150,7 +150,7 @@ char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t
                 exit(1);
         }
         uint32_t i = 0;
-        char last_read = 0xFF;
+        unsigned char last_read = 0xFF;
         for (i = 0; last_read != '\0'; i++) {
                 char c = extract_char(
                         payload,

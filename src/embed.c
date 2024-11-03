@@ -55,14 +55,9 @@ void handle_lsb1(Args *args)
                 free(p_payload);
         }
 
-        /* if (dim * sizeof(char) > bmp->info_header->sizeImage) { */
-        /*         printf("[ERROR] - handle_embedding - Input file is too large, must be at most %d\n", */
-        /*                bmp->info_header->sizeImage); */
-        /*         exit(1); */
-        /* } */
-
         inject_message(bmp->payload, bmp->info_header->sizeImage, payload, dim, 1);
         save_bmp(bmp, args->out);
+
         free(payload);
 }
 
@@ -84,15 +79,10 @@ void handle_lsb4(Args *args)
                 free(p_payload);
         }
 
-        /* if (dim * sizeof(char) / 4 > bmp->info_header->sizeImage) { */
-        /*         printf("[ERROR] - handle_embedding - Input file is too large, must be at most %d\n", */
-        /*                bmp->info_header->sizeImage); */
-        /*         exit(1); */
-        /* } */
-
         inject_message(bmp->payload, bmp->info_header->sizeImage, payload, dim, 4);
-        free(payload);
         save_bmp(bmp, args->out);
+
+        free(payload);
 }
 
 // Step must be a divisor of 8
