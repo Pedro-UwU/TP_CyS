@@ -31,7 +31,7 @@ static const char *algorithm_name(EncryptionAlgorithm algorithm)
         case EncryptAlgo_AES256:
                 return "aes-256";
         case EncryptAlgo_3DES:
-                return "3des";
+                return "des-ede3";
         case EncryptAlgo_NONE:
                 break;
         }
@@ -123,7 +123,7 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
          */
         if (0 == PKCS5_PBKDF2_HMAC(encryption->password, -1, (unsigned char *)__SALT, 0, 10000,
                                    EVP_sha256(), key_len + iv_len, key_iv)) {
-                printf("[ERROR] - encrypt_decrypt_msg - BytesToKey error\n");
+                printf("[ERROR] - encrypt_decrypt_msg - PKCS5_PBKDF2_HMAC error\n");
                 goto end;
         }
 
