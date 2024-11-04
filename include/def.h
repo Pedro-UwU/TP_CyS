@@ -7,9 +7,9 @@
 #define MAX_EXTENSION_LENGTH 64
 
 #define BYTE 1
-#define WORD (2 * BYTE)
-#define DWORD (2 * WORD)
-#define QWORD (2 * DWORD)
+#define WORD (2 * BYTE) // 2 Bytes
+#define DWORD (2 * WORD) // 4 Bytes
+#define QWORD (2 * DWORD) // 8 Bytes
 
 #include <stdint.h>
 

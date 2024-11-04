@@ -24,6 +24,16 @@ void save_extracted_file(Args *args, char *payload, uint32_t payload_length, cha
 void handle_extraction_lsb(Args *args, uint8_t step);
 void handle_lsbi_extraction(Args *args);
 
+typedef enum {
+        LSBI_Pattern_00,
+        LSBI_Pattern_01,
+        LSBI_Pattern_10,
+        LSBI_Pattern_11,
+        N_LSBI_Pattern
+} LSBI_PatternMap;
+
+#define LSBI_BYTE_PATTERN_MASK 0x06 // Bytes 2 and 3 = 0b00000110
+
 void handle_extraction(Args *args)
 {
         if (args == NULL) {
@@ -121,63 +131,110 @@ char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step)
         return message;
 }
 
-void handle_lsbi_extraction(Args *args)
+char *extract_message_lsbi(uint8_t *payload, uint32_t message_size, uint8_t step)
 {
-        BmpFile *carrier = args->carrier;
-        uint8_t *payload = carrier->payload;
-
-        uint32_t message_size = 0;
-        size_t bit_count = 0;
-        size_t byte_index = 0;
-
-        while (bit_count < BITS_FOR_SIZE) {
-                uint8_t current_byte = payload[byte_index];
-                uint8_t step = (current_byte & 1) ? 4 : 1;
-
-                uint8_t bits = current_byte & ((1 << step) - 1);
-                message_size <<= step;
-                message_size |= bits;
-
-                bit_count += step;
-                byte_index++;
-        }
-
-        char *message = malloc(message_size + 1);
+        char *message = malloc(message_size * sizeof(char) + 1);
         if (message == NULL) {
-                printf("[ERROR] - handle_lsbi_extraction - Could not allocate memory for message\n");
+                printf("[ERROR] - extract_message - Couldn't allocate memory for message\n");
                 exit(1);
         }
         message[message_size] = '\0';
+        for (uint32_t i = 0; i < message_size; i++) {
+                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step,
+                                      step);
+                message[i] = c;
+        }
+        return message;
+}
 
-        size_t msg_byte_index = 0;
-        size_t msg_bit_count = 0;
-        unsigned char current_char = 0;
+void handle_lsbi_extraction(Args *args)
+{
+        BmpFile *carrier = args->carrier;
+        size_t payload_size = carrier->info_header->sizeImage;
 
-        while (msg_byte_index < message_size) {
-                uint8_t current_byte = payload[byte_index];
-                uint8_t step = (current_byte & 1) ? 4 : 1;
+        uint8_t *payload = carrier->payload;
 
-                uint8_t bits = current_byte & ((1 << step) - 1);
-                current_char <<= step;
-                current_char |= bits;
-
-                msg_bit_count += step;
-
-                if (msg_bit_count >= 8) {
-                        message[msg_byte_index++] = current_char;
-                        current_char = 0;
-                        msg_bit_count = 0;
-                }
-
-                byte_index++;
+        // 1. Extraer pattern map con LSB1
+        uint8_t pattern_map[N_LSBI_Pattern] = { 0 };
+        for (int i = 0; i < BYTE * N_LSBI_Pattern; i++) {
+                uint8_t byte = payload[i];
+                pattern_map[i] = byte & 0x01;
         }
 
-        char *extension = extract_payload_extension(payload + byte_index, message_size, 1);
+        payload += BYTE * N_LSBI_Pattern;
 
-        save_extracted_file(args, message, message_size, extension);
+        // Reverse LSBI bits
+        for (uint32_t i = 0; i < payload_size - BYTE * N_LSBI_Pattern; i += 1) {
+                if ((i + 2) % 3 == 0) {
+                        // Skip RED byte. Remember: its in BGR
+                        continue;
+                }
 
-        free(message);
-        free(extension);
+                uint32_t b = (payload[i] & LSBI_BYTE_PATTERN_MASK) >> 1;
+                if (pattern_map[b] == 0) {
+                        // Not inverted
+                        continue;
+                }
+
+                /* PAPER
+                 *
+                 * Finally, we inverse the last bit of the stego-
+                 * image, if the number of pixels that have 
+                 * changed in specific patterns are greater than
+                 * the number of pixels that are not changed.
+                 */
+                if (payload[i] & 0x01) {
+                        payload[i] &= 0xFF ^ 0x01;
+                } else {
+                        payload[i] |= 0x01;
+                }
+        }
+
+        uint8_t *message_from_payload = calloc(payload_size, sizeof(uint8_t));
+        if (message_from_payload == NULL) {
+                printf("[ERROR] - handle_lsbi_extraction - Failed to allocate memory\n");
+                goto end;
+        }
+
+        // Extract message with size and extension from payload
+        uint8_t byte[8] = { 0 };
+        for (uint32_t i = 0, j = 0, k = 0; i < payload_size - BYTE * N_LSBI_Pattern; i++) {
+                if ((i + 2) % 3 == 0) {
+                        // Skip RED byte. Remember: its in BGR
+                        continue;
+                }
+
+                byte[j] = payload[i] & 0x01;
+                j++;
+
+                if (j < 8) {
+                        continue;
+                }
+
+                // Bits to byte
+                message_from_payload[k] = byte[0] << 7;
+                message_from_payload[k] |= byte[1] << 6;
+                message_from_payload[k] |= byte[2] << 5;
+                message_from_payload[k] |= byte[3] << 4;
+                message_from_payload[k] |= byte[4] << 3;
+                message_from_payload[k] |= byte[5] << 2;
+                message_from_payload[k] |= byte[6] << 1;
+                message_from_payload[k] |= byte[7] << 0;
+
+                j = 0;
+                k++;
+        }
+
+        // decrypt here
+
+        uint32_t message_size = get_message_lenght(message_from_payload);
+        unsigned char *message = message_from_payload + DWORD; // Skip size
+        char *extension = extract_message_extension(message, message_size);
+
+        save_extracted_file(args, (char *)message, message_size, extension);
+
+end:
+        free(message_from_payload);
 }
 
 uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step)
