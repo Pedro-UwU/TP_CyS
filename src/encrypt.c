@@ -18,7 +18,7 @@
 #include <openssl/err.h>
 
 // Consigna
-static const unsigned char __SALT[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+static const unsigned char __SALT[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 typedef enum { EncryptAction_DECRYPT = 0, EncryptAction_ENCRYPT = 1 } EncryptAction;
 
@@ -121,8 +121,8 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
                 goto end;
         }
 
-        if (0 == PKCS5_PBKDF2_HMAC(encryption->password, strlen(encryption->password), __SALT, sizeof(__SALT), 10000,
-                                   EVP_sha256(), key_len + iv_len, key_iv)) {
+        if (0 == PKCS5_PBKDF2_HMAC(encryption->password, strlen(encryption->password), __SALT,
+                                   sizeof(__SALT), 10000, EVP_sha256(), key_len + iv_len, key_iv)) {
                 printf("[ERROR] - encrypt_decrypt_msg - PKCS5_PBKDF2_HMAC error\n");
                 goto end;
         }
