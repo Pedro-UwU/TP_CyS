@@ -135,7 +135,8 @@ char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step)
         }
         message[message_size] = '\0';
         for (uint32_t i = 0; i < message_size; i++) {
-                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step, step);
+                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step,
+                                      step);
                 message[i] = c;
         }
         return message;
@@ -152,7 +153,9 @@ char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t
         uint32_t i = 0;
         unsigned char last_read = 0xFF;
         for (i = 0; last_read != '\0'; i++) {
-                char c = extract_char(payload, BITS_FOR_SIZE / step + (i + message_size) * sizeof(char) * 8 / step, step);
+                char c = extract_char(
+                        payload,
+                        BITS_FOR_SIZE / step + (i + message_size) * sizeof(char) * 8 / step, step);
                 extension[i] = c;
                 last_read = c;
         }
@@ -203,11 +206,11 @@ void handle_lsbi_extraction(Args *args)
         while (bit_count < BITS_FOR_SIZE) {
                 uint8_t current_byte = payload[byte_index];
                 uint8_t step = (current_byte & 1) ? 4 : 1;
-                
+
                 uint8_t bits = current_byte & ((1 << step) - 1);
                 message_size <<= step;
                 message_size |= bits;
-                
+
                 bit_count += step;
                 byte_index++;
         }
@@ -226,19 +229,19 @@ void handle_lsbi_extraction(Args *args)
         while (msg_byte_index < message_size) {
                 uint8_t current_byte = payload[byte_index];
                 uint8_t step = (current_byte & 1) ? 4 : 1;
-                
+
                 uint8_t bits = current_byte & ((1 << step) - 1);
                 current_char <<= step;
                 current_char |= bits;
-                
+
                 msg_bit_count += step;
-                
+
                 if (msg_bit_count >= 8) {
                         message[msg_byte_index++] = current_char;
                         current_char = 0;
                         msg_bit_count = 0;
                 }
-                
+
                 byte_index++;
         }
 

@@ -16,7 +16,7 @@ void inject_message(unsigned char *dest, size_t dest_size, const unsigned char *
                     size_t step);
 void handle_lsb1(Args *args);
 void handle_lsb4(Args *args);
-void handle_lsbi(Args* args);
+void handle_lsbi(Args *args);
 
 void handle_embedding(Args *args)
 {
@@ -31,7 +31,8 @@ void handle_embedding(Args *args)
         case LSB4:
                 handle_lsb4(args);
                 break;
-        case LSBI: handle_lsbi(args); 
+        case LSBI:
+                handle_lsbi(args);
                 break;
         default:
                 break;
@@ -117,11 +118,13 @@ void handle_lsbi(Args *args)
                 }
 
                 unsigned char current_byte = bmp->payload[dest_index];
-                size_t step = (current_byte & 1) ? 4 : 1;  // Si LSB es 1, usar 4 bits, si es 0 usar 1 bit
+                size_t step =
+                        (current_byte & 1) ? 4 : 1; // Si LSB es 1, usar 4 bits, si es 0 usar 1 bit
 
                 char_index = index / QWORD;
                 bit_index = index % QWORD;
-                unsigned char byte_to_inject = get_isolated_bits(payload[char_index], bit_index, step);
+                unsigned char byte_to_inject =
+                        get_isolated_bits(payload[char_index], bit_index, step);
 
                 unsigned char mask = ~((1 << step) - 1);
                 bmp->payload[dest_index] &= mask;
@@ -134,7 +137,6 @@ void handle_lsbi(Args *args)
         save_bmp(bmp, args->out);
         free(payload);
 }
-
 
 void inject_message(unsigned char *dest, size_t dest_size, const unsigned char *msg, size_t msg_dim,
                     size_t step)
