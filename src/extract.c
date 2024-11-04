@@ -11,15 +11,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Declaraciones de funciones
 static void extract_encrypted_msg(Args *args, uint8_t step);
-uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t bits);
 void handle_extraction_lsb(Args *args, uint8_t step);
+uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step);
+uint32_t get_message_lenght(uint8_t *message);
+char extract_char(uint8_t *payload, uint32_t index, uint8_t step);
 char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step);
 char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t step);
-void save_extracted_file(Args *args, char *payload, uint32_t payload_length, char *extension);
-
-uint32_t get_message_lenght(uint8_t *message);
 char *extract_message_extension(unsigned char *message, uint32_t message_size);
+void save_extracted_file(Args *args, char *payload, uint32_t payload_length, char *extension);
+void handle_lsbi_extraction(Args *args);
 
 void handle_extraction(Args *args)
 {
@@ -37,6 +39,7 @@ void handle_extraction(Args *args)
                         handle_extraction_lsb(args, 4);
                         break;
                 case LSBI:
+                        handle_lsbi_extraction(args);
                         break;
                 }
         } else {
@@ -79,12 +82,11 @@ void handle_extraction_lsb(Args *args, uint8_t step)
 {
         BmpFile *carrier = args->carrier;
         uint8_t *payload = carrier->payload;
-        // size_t payload_length = carrier->info_header->sizeImage;
         uint32_t message_size = get_payload_message_lenght(payload, step);
         char *message = extract_message(payload, message_size, step);
         char *extension = extract_payload_extension(payload, message_size, step);
-        save_extracted_file(args, (char *)message, message_size, extension);
-        free(message); // TO DELETE
+        save_extracted_file(args, message, message_size, extension);
+        free(message);
         free(extension);
 }
 
@@ -133,8 +135,7 @@ char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step)
         }
         message[message_size] = '\0';
         for (uint32_t i = 0; i < message_size; i++) {
-                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step,
-                                      step);
+                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step, step);
                 message[i] = c;
         }
         return message;
@@ -145,16 +146,13 @@ char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t
         char *extension = malloc(MAX_EXTENSION_LENGTH * sizeof(char));
         memset(extension, 0xFF, MAX_EXTENSION_LENGTH);
         if (extension == NULL) {
-                printf("[ERROR] - extract_payload_extension - Couldn't allocate memory for "
-                       "extension\n");
+                printf("[ERROR] - extract_payload_extension - Couldn't allocate memory for extension\n");
                 exit(1);
         }
         uint32_t i = 0;
         unsigned char last_read = 0xFF;
         for (i = 0; last_read != '\0'; i++) {
-                char c = extract_char(
-                        payload,
-                        BITS_FOR_SIZE / step + (i + message_size) * sizeof(char) * 8 / step, step);
+                char c = extract_char(payload, BITS_FOR_SIZE / step + (i + message_size) * sizeof(char) * 8 / step, step);
                 extension[i] = c;
                 last_read = c;
         }
@@ -191,6 +189,65 @@ void save_extracted_file(Args *args, char *payload, uint32_t payload_length, cha
         printf("Created file: %s\n", full_path);
         fclose(output_file);
         free(full_path);
+}
+
+void handle_lsbi_extraction(Args *args)
+{
+        BmpFile *carrier = args->carrier;
+        uint8_t *payload = carrier->payload;
+
+        uint32_t message_size = 0;
+        size_t bit_count = 0;
+        size_t byte_index = 0;
+
+        while (bit_count < BITS_FOR_SIZE) {
+                uint8_t current_byte = payload[byte_index];
+                uint8_t step = (current_byte & 1) ? 4 : 1;
+                
+                uint8_t bits = current_byte & ((1 << step) - 1);
+                message_size <<= step;
+                message_size |= bits;
+                
+                bit_count += step;
+                byte_index++;
+        }
+
+        char *message = malloc(message_size + 1);
+        if (message == NULL) {
+                printf("[ERROR] - handle_lsbi_extraction - Could not allocate memory for message\n");
+                exit(1);
+        }
+        message[message_size] = '\0';
+
+        size_t msg_byte_index = 0;
+        size_t msg_bit_count = 0;
+        unsigned char current_char = 0;
+
+        while (msg_byte_index < message_size) {
+                uint8_t current_byte = payload[byte_index];
+                uint8_t step = (current_byte & 1) ? 4 : 1;
+                
+                uint8_t bits = current_byte & ((1 << step) - 1);
+                current_char <<= step;
+                current_char |= bits;
+                
+                msg_bit_count += step;
+                
+                if (msg_bit_count >= 8) {
+                        message[msg_byte_index++] = current_char;
+                        current_char = 0;
+                        msg_bit_count = 0;
+                }
+                
+                byte_index++;
+        }
+
+        char *extension = extract_payload_extension(payload + byte_index, message_size, 1);
+
+        save_extracted_file(args, message, message_size, extension);
+
+        free(message);
+        free(extension);
 }
 
 #endif
