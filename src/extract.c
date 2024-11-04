@@ -11,6 +11,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum {
+        LSBI_Pattern_00,
+        LSBI_Pattern_01,
+        LSBI_Pattern_10,
+        LSBI_Pattern_11,
+        N_LSBI_Pattern
+} LSBI_PatternMap;
+
+#define LSBI_BYTE_PATTERN_MASK 0x06 // Bytes 2 and 3 = 0b00000110
+
 uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step);
 uint32_t get_message_lenght(uint8_t *message);
 
@@ -21,18 +31,13 @@ char *extract_payload_extension(uint8_t *payload, uint32_t message_size, uint8_t
 char *extract_message_extension(unsigned char *message, uint32_t message_size);
 void save_extracted_file(Args *args, char *payload, uint32_t payload_length, char *extension);
 
+static uint8_t *lsbi_extract_pattern_map(uint8_t *payload, size_t *payload_size,
+                                         uint8_t pattern_map[N_LSBI_Pattern]);
+uint8_t *reverse_lsbi_bits(uint8_t *payload, size_t payload_size, uint8_t *pattern_map);
+uint8_t *extract_message_lsbi(uint8_t *payload, size_t payload_size);
+
 void handle_extraction_lsb(Args *args, uint8_t step);
 void handle_lsbi_extraction(Args *args);
-
-typedef enum {
-        LSBI_Pattern_00,
-        LSBI_Pattern_01,
-        LSBI_Pattern_10,
-        LSBI_Pattern_11,
-        N_LSBI_Pattern
-} LSBI_PatternMap;
-
-#define LSBI_BYTE_PATTERN_MASK 0x06 // Bytes 2 and 3 = 0b00000110
 
 void handle_extraction(Args *args)
 {
@@ -131,40 +136,22 @@ char *extract_message(uint8_t *payload, uint32_t message_size, uint8_t step)
         return message;
 }
 
-char *extract_message_lsbi(uint8_t *payload, uint32_t message_size, uint8_t step)
+static uint8_t *lsbi_extract_pattern_map(uint8_t *payload, size_t *payload_size,
+                                         uint8_t pattern_map[N_LSBI_Pattern])
 {
-        char *message = malloc(message_size * sizeof(char) + 1);
-        if (message == NULL) {
-                printf("[ERROR] - extract_message - Couldn't allocate memory for message\n");
-                exit(1);
-        }
-        message[message_size] = '\0';
-        for (uint32_t i = 0; i < message_size; i++) {
-                char c = extract_char(payload, BITS_FOR_SIZE / step + i * sizeof(char) * 8 / step,
-                                      step);
-                message[i] = c;
-        }
-        return message;
-}
-
-void handle_lsbi_extraction(Args *args)
-{
-        BmpFile *carrier = args->carrier;
-        size_t payload_size = carrier->info_header->sizeImage;
-
-        uint8_t *payload = carrier->payload;
-
-        // 1. Extraer pattern map con LSB1
-        uint8_t pattern_map[N_LSBI_Pattern] = { 0 };
         for (int i = 0; i < BYTE * N_LSBI_Pattern; i++) {
                 uint8_t byte = payload[i];
                 pattern_map[i] = byte & 0x01;
         }
 
-        payload += BYTE * N_LSBI_Pattern;
+        *payload_size -= BYTE * N_LSBI_Pattern;
 
-        // Reverse LSBI bits
-        for (uint32_t i = 0; i < payload_size - BYTE * N_LSBI_Pattern; i += 1) {
+        return payload + BYTE * N_LSBI_Pattern;
+}
+
+uint8_t *reverse_lsbi_bits(uint8_t *payload, size_t payload_size, uint8_t *pattern_map)
+{
+        for (uint32_t i = 0; i < payload_size; i += 1) {
                 if ((i + 2) % 3 == 0) {
                         // Skip RED byte. Remember: its in BGR
                         continue;
@@ -190,15 +177,20 @@ void handle_lsbi_extraction(Args *args)
                 }
         }
 
+        return payload;
+}
+
+uint8_t *extract_message_lsbi(uint8_t *payload, size_t payload_size)
+{
+        // Message will be at most as big as the payload
         uint8_t *message_from_payload = calloc(payload_size, sizeof(uint8_t));
         if (message_from_payload == NULL) {
-                printf("[ERROR] - handle_lsbi_extraction - Failed to allocate memory\n");
-                goto end;
+                printf("[ERROR] - extract_message_lsbi - Failed to allocate memory for LSBI message\n");
+                return NULL;
         }
 
-        // Extract message with size and extension from payload
         uint8_t byte[8] = { 0 };
-        for (uint32_t i = 0, j = 0, k = 0; i < payload_size - BYTE * N_LSBI_Pattern; i++) {
+        for (uint32_t i = 0, j = 0, k = 0; i < payload_size; i++) {
                 if ((i + 2) % 3 == 0) {
                         // Skip RED byte. Remember: its in BGR
                         continue;
@@ -225,16 +217,56 @@ void handle_lsbi_extraction(Args *args)
                 k++;
         }
 
-        // decrypt here
+        return message_from_payload;
+}
 
-        uint32_t message_size = get_message_lenght(message_from_payload);
-        unsigned char *message = message_from_payload + DWORD; // Skip size
-        char *extension = extract_message_extension(message, message_size);
+void handle_lsbi_extraction(Args *args)
+{
+        BmpFile *carrier = args->carrier;
+        size_t payload_size = carrier->info_header->sizeImage;
+
+        uint8_t *payload = carrier->payload;
+
+        // Extraer pattern map con LSB1
+        uint8_t pattern_map[N_LSBI_Pattern] = { 0 };
+        payload = lsbi_extract_pattern_map(payload, &payload_size, pattern_map);
+
+        // Reverse LSBI bits in payload
+        payload = reverse_lsbi_bits(payload, payload_size, pattern_map);
+
+        uint8_t *full_message = extract_message_lsbi(payload, payload_size);
+        if (full_message == NULL) {
+                printf("[ERROR] - handle_lsbi_extraction - Message could not be extracted using LSBI");
+                goto end;
+        }
+
+        uint32_t message_size;
+        unsigned char *message;
+        char *extension;
+        unsigned char *decrypted = NULL;
+
+        if (args->encryption.algorithm == EncryptAlgo_NONE) {
+                message_size = get_message_lenght(full_message);
+                message = full_message + DWORD; // Skip size
+                extension = extract_message_extension(message, message_size);
+        } else {
+                uint32_t e_message_size = get_message_lenght(full_message);
+                uint8_t *e_message = full_message + DWORD; // Skip size
+
+                size_t d_size = 0;
+                decrypted = decrypt_payload(&args->encryption, (unsigned char *)e_message,
+                                            e_message_size, &d_size);
+
+                message_size = get_message_lenght(decrypted);
+                message = decrypted + DWORD;
+                extension = extract_message_extension(message, message_size);
+        }
 
         save_extracted_file(args, (char *)message, message_size, extension);
 
 end:
-        free(message_from_payload);
+        free(full_message);
+        free(decrypted);
 }
 
 uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step)
