@@ -15,11 +15,23 @@
 #include <strings.h>
 
 #include <openssl/evp.h>
+#include <openssl/err.h>
 
 // Consigna
-static const uint8_t *__SALT = 0x0000000000000000;
+static const unsigned char __SALT[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef enum { EncryptAction_DECRYPT = 0, EncryptAction_ENCRYPT = 1 } EncryptAction;
+
+static void print_openssl_errors()
+{
+        unsigned long err_code;
+        char *err_msg;
+
+        while ((err_code = ERR_get_error())) {
+                err_msg = ERR_error_string(err_code, NULL);
+                fprintf(stderr, "OpenSSL Error [%#lx]: %s\n", err_code, err_msg);
+        }
+}
 
 static const char *algorithm_name(EncryptionAlgorithm algorithm)
 {
@@ -109,7 +121,7 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
                 goto end;
         }
 
-        if (0 == PKCS5_PBKDF2_HMAC(encryption->password, -1, (unsigned char *)__SALT, 0, 10000,
+        if (0 == PKCS5_PBKDF2_HMAC(encryption->password, strlen(encryption->password), __SALT, sizeof(__SALT), 10000,
                                    EVP_sha256(), key_len + iv_len, key_iv)) {
                 printf("[ERROR] - encrypt_decrypt_msg - PKCS5_PBKDF2_HMAC error\n");
                 goto end;
@@ -150,6 +162,8 @@ static int encrypt_decrypt_msg(Encryption *encryption, EncryptAction action,
         ret = 1;
 
 end:
+        print_openssl_errors();
+
         free(iv);
         free(key);
         free(key_iv);
