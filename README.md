@@ -6,7 +6,7 @@
 | :--- | ---: | :--- |
 | Pedro Jeremías López Guzmán | 60711 | [pelopez@itba.edu.ar](mailto:pelopez@itba.edu.ar) |
 | Lucía Digon | 59030 | [ldigon@itba.edu.ar](mailto:ldigon@itba.edu.ar) |
-| Eduardo Federico Madero Torres | 59030 | [emadero@itba.edu.ar](mailto:emadero@itba.edu.ar) |
+| Eduardo Federico Madero Torres | 59494 | [emadero@itba.edu.ar](mailto:emadero@itba.edu.ar) |
 | Martín E. Zahnd | 60401 | [mzahnd@itba.edu.ar](mailto:mzahnd@itba.edu.ar) |
 
 ## Ejecución
