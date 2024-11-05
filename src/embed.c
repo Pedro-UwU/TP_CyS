@@ -153,6 +153,7 @@ void inject_message(unsigned char *dest, size_t dest_size, const unsigned char *
                 dest[dest_index] |= byte_to_inject;
                 dest_index++;
         }
+        printf("Written: %ld bytes\n", dest_index);
 }
 
 void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned char *msg,
@@ -161,8 +162,6 @@ void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned c
         size_t index = N_LSBI_Pattern;
         for (size_t i = 0; i < msg_dim; i++) {
                 unsigned char cbyte = msg[i];
-
-                printf("index: %ld\n", index);
 
                 for (int bit_index = 0; bit_index < 8; bit_index += 1) {
                         if (index > dest_size - 1) {
@@ -183,6 +182,7 @@ void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned c
                         index++;
                 }
         }
+        printf("Written: %ld bytes\n", index);
 }
 
 unsigned char get_isolated_bits(unsigned char value, size_t index, size_t length)
