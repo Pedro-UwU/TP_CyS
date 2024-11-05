@@ -10,16 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef enum {
-        LSBI_Pattern_00,
-        LSBI_Pattern_01,
-        LSBI_Pattern_10,
-        LSBI_Pattern_11,
-        N_LSBI_Pattern
-} LSBI_PatternMap;
-
-#define LSBI_BYTE_PATTERN_MASK 0x06 // Bytes 2 and 3 = 0b00000110
+#include <lsbi.h>
 
 uint32_t get_payload_message_lenght(uint8_t *payload, uint8_t step);
 uint32_t get_message_lenght(uint8_t *message);

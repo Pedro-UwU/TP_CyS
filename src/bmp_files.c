@@ -194,4 +194,17 @@ void save_bmp(BmpFile *bmp, char *path)
         fclose(output_file);
 }
 
+unsigned char *clone_bmp_payload(BmpFile *bmp)
+{
+        unsigned char *original_payload = malloc(bmp->info_header->sizeImage);
+        if (original_payload == NULL) {
+                printf("[ERROR] - handle_lsbi - Could not allocate memory for copying payload.");
+                exit(1);
+        }
+        memcpy(original_payload, bmp->payload, bmp->info_header->sizeImage);
+
+        return original_payload;
+}
+
+
 #endif
