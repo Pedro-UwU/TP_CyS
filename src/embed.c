@@ -17,7 +17,7 @@ unsigned char get_isolated_bits(unsigned char value, size_t index, size_t length
 void inject_message(unsigned char *dest, size_t dest_size, const unsigned char *msg, size_t msg_dim,
                     size_t step);
 void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned char *msg,
-                         size_t msg_dim, size_t header_size);
+                         size_t msg_dim);
 
 void handle_lsb1(Args *args);
 void handle_lsb4(Args *args);
@@ -158,10 +158,8 @@ void handle_lsbi(Args *args)
                 free(p_payload);
         }
 
-        // Aplicar LSB1 estándar primero
-        inject_lsbi_message(bmp->payload, bmp->info_header->sizeImage, payload, dim, 4);
+        inject_lsbi_message(bmp->payload, bmp->info_header->sizeImage, payload, dim);
 
-        // Analizar cambios por patrón
         size_t pattern_count[N_LSBI_Pattern] = { 0 };
         size_t pattern_changes[N_LSBI_Pattern] = { 0 };
 
@@ -171,10 +169,8 @@ void handle_lsbi(Args *args)
         lsbi_apply_pattern_map_to_payload(bmp->payload, bmp->info_header->sizeImage, pattern_count,
                                           pattern_changes);
 
-        // Guardar resultado
         save_bmp(bmp, args->out);
 
-lsbi_end:
         free(payload);
         free(bmp_payload_copy);
 }
@@ -253,24 +249,29 @@ void inject_message(unsigned char *dest, size_t dest_size, const unsigned char *
 }
 
 void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned char *msg,
-                         size_t msg_dim, size_t header_size)
+                         size_t msg_dim)
 {
-        size_t from = header_size;
-        size_t nBits = 1;
+        size_t index = N_LSBI_Pattern;
         for (size_t i = 0; i < msg_dim; i++) {
-                unsigned char currByte = msg[i];
+                unsigned char cbyte = msg[i];
 
-                for (int bitIndex = 0; bitIndex < 8; bitIndex += nBits) {
-                        if ((from + 1) % 3 != 0) {
-                                int bitValue = (currByte >> (8 - nBits - bitIndex)) &
-                                               ((1 << nBits) - 1);
+                if (index > dest_size - 1) {
+                        printf("[ERROR] - inject_lsbi_message - Input file is too large, must be at most %ld\n"
+                               "[ERROR] - inject_lsbi_message - Reached dest_index: %ld\n",
+                               (dest_size / QWORD) - QWORD - 1, index);
+                        exit(1);
+                }
 
-                                dest[from] = (dest[from] & ~((1 << nBits) - 1)) |
-                                             (unsigned char)bitValue;
+                for (int bit_index = 0; bit_index < 8; bit_index += 1) {
+                        if ((index + 1) % 3 != 0) {
+                                int byte_to_inject = get_isolated_bits(cbyte, bit_index, 1);
+                                dest[index] &= ~((1 << 1) - 1);
+                                dest[index] |= byte_to_inject;
                         } else {
-                                bitIndex -= nBits;
+                                bit_index -= 1;
                         }
-                        from++;
+
+                        index++;
                 }
         }
 }
