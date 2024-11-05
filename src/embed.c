@@ -162,14 +162,16 @@ void inject_lsbi_message(unsigned char *dest, size_t dest_size, const unsigned c
         for (size_t i = 0; i < msg_dim; i++) {
                 unsigned char cbyte = msg[i];
 
-                if (index > dest_size - 1) {
-                        printf("[ERROR] - inject_lsbi_message - Input file is too large, must be at most %ld\n"
-                               "[ERROR] - inject_lsbi_message - Reached dest_index: %ld\n",
-                               (dest_size / QWORD) - QWORD - 1, index);
-                        exit(1);
-                }
+                printf("index: %ld\n", index);
 
                 for (int bit_index = 0; bit_index < 8; bit_index += 1) {
+                        if (index > dest_size - 1) {
+                                printf("[ERROR] - inject_lsbi_message - Input file is too large, must be at most %ld\n"
+                                       "[ERROR] - inject_lsbi_message - Reached dest_index: %ld\n",
+                                       (2 * dest_size / 3 / QWORD) - 4 - 6, index);
+                                exit(1);
+                        }
+
                         if ((index + 1) % 3 != 0) {
                                 int byte_to_inject = get_isolated_bits(cbyte, bit_index, 1);
                                 dest[index] &= ~((1 << 1) - 1);
